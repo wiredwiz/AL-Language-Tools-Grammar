@@ -9,7 +9,7 @@ DELIMITED_COMMENT
 	: '/*' .*? '*/' -> channel(COMMENTS_CHANNEL);
 
 WS
-	:	' ' -> channel(HIDDEN)
+	:	[ \t\r\n] -> channel(HIDDEN)
 	;
 
 SEMICOLON
@@ -20,6 +20,54 @@ COLON
 
 COMMA
    : ',';
+
+PERIOD
+   : '.';
+
+GREATERTHANEQUAL
+   : '>=';
+
+LESSTHANEQUAL
+   : '<=';
+
+NOTEQUAL
+   : '<>';
+
+ASSGN
+   : ':=';
+
+MULTIPLY_ASSGN
+   : '*=';
+
+DIV_ASSGN
+   : '/=';
+
+ADD_ASSGN
+   : '+=';
+
+MINUS_ASSGN
+   : '-=';
+
+EQUALS
+   : '=';
+
+ASTERISK
+   : '*';
+
+BACKSLASH
+   : '/';
+
+PLUS
+   : '+';
+
+MINUS
+   : '-';
+
+LESSTHAN
+   : '<';
+
+GREATERTHAN
+   : '>';
 
 /*
  * Control Keywords
@@ -97,10 +145,6 @@ INDATASET
    : I N D A T A S E T
    ;
 
-INTERFACE
-   : I N T E R F A C E
-   ;
-
 INTERNAL
    : I N T E R N A L
    ;
@@ -131,10 +175,6 @@ REPEAT
 
 RUNONCLIENT
    : R U N O N C L I E N T
-   ;
-
-SECURITYFILTERING
-   : S E C U R I T Y F I L T E R I N G
    ;
 
 SUPPRESSDISPOSE
@@ -278,7 +318,7 @@ DESCENDING
    ;
 
 /* 
- * properties 
+ * application object types
  */
 
 CODEUNIT
@@ -295,10 +335,6 @@ PAGEEXTENSION
 
 PAGECUSTOMIZATION
    : P A G E C U S T O M I Z A T I O N
-   ;
-
-DOTNET
-   : D O T N E T
    ;
 
 ENUM
@@ -369,10 +405,6 @@ ACTION
    : A C T I O N
    ;
 
-ARRAY
-   : A R R A Y
-   ;
-
 AUTOMATION
    : A U T O M A T I O N
    ;
@@ -407,10 +439,6 @@ CLIENTTYPE
 
 CODE
    : C O D E
-   ;
-
-CODEUNIT
-   : C O D E U N I T
    ;
 
 COMPLETIONTRIGGERERRORLEVEL
@@ -475,10 +503,6 @@ DOTNETTYPEDECLARATION
 
 DURATION
    : D U R A T I O N
-   ;
-
-ENUM
-   : E N U M
    ;
 
 ERRORINFO
@@ -573,17 +597,10 @@ OUTSTREAM
    : O U T S T R E A M
    ;
 
-PAGE
-   : P A G E
-   ;
-
 PAGERESULT
    : P A G E R E S U L T
    ;
 
-QUERY
-   : Q U E R Y
-   ;
 
 RECORD
    : R E C O R D
@@ -597,10 +614,6 @@ RECORDREF
    : R E C O R D R E F
    ;
 
-REPORT
-   : R E P O R T
-   ;
-
 REPORTFORMAT
    : R E P O R T F O R M A T
    ;
@@ -611,10 +624,6 @@ SECURITYFILTER
 
 SECURITYFILTERING
    : S E C U R I T Y F I L T E R I N G
-   ;
-
-TABLE
-   : T A B L E
    ;
 
 TABLECONNECTIONTYPE
@@ -687,10 +696,6 @@ VERBOSITY
 
 VERSION
    : V E R S I O N
-   ;
-
-XMLPORT
-   : X M L P O R T
    ;
 
 HTTPCONTENT
@@ -837,10 +842,6 @@ ADDBEFORE
    : A D D B E F O R E
    ;
 
-ACTION
-   : A C T I O N
-   ;
-
 ACTIONS
    : A C T I O N S
    ;
@@ -885,10 +886,6 @@ EXTENDS
    : E X T E N D S
    ;
 
-FIELD
-   : F I E L D
-   ;
-
 FIELDGROUP
    : F I E L D G R O U P
    ;
@@ -909,10 +906,6 @@ FIELDS
    : F I E L D S
    ;
 
-FILTER
-   : F I L T E R
-   ;
-
 FIXED
    : F I X E D
    ;
@@ -923,14 +916,6 @@ GRID
 
 GROUP
    : G R O U P
-   ;
-
-MOVEAFTER
-   : M O V E A F T E R
-   ;
-
-MOVEBEFORE
-   : M O V E B E F O R E
    ;
 
 KEY
@@ -1021,18 +1006,16 @@ TYPE
  * numbers 
  */
 
-INTEGER
-   : ('0' X HEXDIGIT? | DIGIT+) (EXPONENTNOTATION EXPONENTSIGN DIGIT+)? INTEGER_SUFFIX?
+INTEGER_NUMBER
+   : DIGIT+
+   | ('0' X HEXDIGIT*? | DIGIT+) (EXPONENT_NOTATION EXPONENT_SIGN DIGIT+)? INTEGER_SUFFIX?
    ;
 
-FLOAT
-	: (DIGIT+ [.] (DIGIT*)? (EXPONENTNOTATION EXPONENTSIGN DIGIT+)? 
-	| [.] DIGIT+ (EXPONENTNOTATION EXPONENTSIGN DIGIT+)? 
-	| DIGIT+ EXPONENTNOTATION EXPONENTSIGN DIGIT+) FLOAT_SUFFIX?
+FLOAT_NUMBER
+	: (DIGIT+ [.] (DIGIT*)? (EXPONENT_NOTATION EXPONENT_SIGN DIGIT+)? 
+	| [.] DIGIT+ (EXPONENT_NOTATION EXPONENT_SIGN DIGIT+)? 
+	| DIGIT+ EXPONENT_NOTATION EXPONENT_SIGN DIGIT+) FLOAT_SUFFIX?
 	;
-
-NUMBER
-   : INTEGER | FLOAT;
 
 /* 
  * strings 
@@ -1045,17 +1028,17 @@ STRING
  * identifiers 
  */
 
+IDENTIFIER
+	: (LETTER | DIGIT | UNDERSCORE)+
+   | '"' ~["]+ '"'
+	;
+
 UNDERSCORE
 	: '_';
 
 LETTER
 	: LOWERCASE 
 	| UPPERCASE
-	;
-
-IDENTIFIER
-	: (LETTER | DIGIT | UNDERSCORE)+
-   | '"' ~["]+ '"'
 	;
 
 /*
@@ -1075,7 +1058,7 @@ fragment LOWERCASE
 fragment UPPERCASE
 	: [A-Z] ;
 
-fragment EXPONENT_NOTIFICATION
+fragment EXPONENT_NOTATION
 	: ('E' | 'e');
 
 fragment EXPONENT_SIGN
@@ -1084,11 +1067,7 @@ fragment EXPONENT_SIGN
 fragment DIGIT
 	: [0-9] ;
 
-fragment INPUT_CHARACTER
-	: ~[\r\n\u0085\u2028\u2029];
-
-fragment ESC 
-	: '\'\'' ;
+fragment HEXDIGIT : [0-9] | [A-F] | [a-f];
 
 fragment INTEGER_SUFFIX
    : [uU] [lL]? [lL]? | [lL] [lL]?;
@@ -1096,7 +1075,11 @@ fragment INTEGER_SUFFIX
 fragment FLOAT_SUFFIX
    : [fF];
 
-fragment HEXDIGIT : [0-9] | [A-F] | [a-f];
+fragment ESC 
+	: '\'\'' ;
+
+fragment INPUT_CHARACTER
+	: ~[\r\n\u0085\u2028\u2029];
 
 fragment A : [aA];
 fragment B : [bB];

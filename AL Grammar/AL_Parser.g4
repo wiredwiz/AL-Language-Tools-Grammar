@@ -49,27 +49,22 @@ statement
    : expression SEMICOLON;
 
 statementBlock
-   : BEGIN (statement (statement)*?)? END;
+   : BEGIN statementList END;
+
+statementList
+   : (statement (statement)*?)?;
 
 expression
-   : mathExpression
-   | comparisonExpression
-   | logicalComparisonExpression
-   | assignmentExpression
-   | IDENTIFIER
-   | STRING
-   | NUMBER;
+   : expression ('*' | '/' | MOD) expression #DivMultExpression
+   | expression ('+' | '-') expression #AddSubtractExpression
+   | expression ('<' | '>' | '<=' | '>=' | '<>' | '=') expression #ComparisonExpression
+   | expression (AND | OR) expression #LogicalComparisonExpression
+   | IDENTIFIER (':=' | '/=' | '*=' | '+=' | '-=') expression #AssignmentExpression
+   | IDENTIFIER #IdentifierExpression
+   | STRING #StringLiteralExpression
+   | number #NumberLiteralExpression;
 
-mathExpression
-   : (expression ('*' | '/' | MOD) expression
-   | expression ('+' | '-') expression);
-
-comparisonExpression
-   : expression ('<' | '>' | '<=' | '>=' | '<>') expression;
-
-logicalComparisonExpression
-   : expression (AND | OR) expression;
-
-assignmentExpression
-   : (expression ('*' | '/' | MOD) expression
-   | expression ('+' | '-') expression);
+number
+   : FLOAT_NUMBER
+   | INTEGER_NUMBER
+   ;
