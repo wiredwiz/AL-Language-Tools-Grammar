@@ -2,7 +2,21 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <RootNamespace>AL_Grammar</RootNamespace>
+    <RootNamespace>Org.Edgerunner.BC.AL.Grammar</RootNamespace>
+    <AssemblyName>Org.Edgerunner.BC.AL.Grammar</AssemblyName>
+    <Authors>Thaddeus Ryker</Authors>
+    <Company>Edgerunner</Company>
+    <Product>Edgerunner AL Grammar Parser</Product>
+    <Description>An ANTLR Grammar parser for the AL language.</Description>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Update="AL_Lexer.g4">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
+    <None Update="AL_Parser.g4">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
+  </ItemGroup>
 
 </Project>
