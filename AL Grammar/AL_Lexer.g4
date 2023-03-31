@@ -12,6 +12,12 @@ WS
 	:	[ \t\r\n] -> channel(HIDDEN)
 	;
 
+OPTION_MEMBER
+   : '::';
+
+RANGE
+   : '..';
+
 SEMICOLON
    : ';';
 
@@ -68,6 +74,18 @@ LESSTHAN
 
 GREATERTHAN
    : '>';
+
+LEFTPAREN
+   : '(';
+
+RIGHTPAREN
+   : ')';
+
+LEFTBRACKET
+   : '[';
+
+RIGHTBRACKET
+   : ']';
 
 /*
  * Control Keywords
@@ -1002,17 +1020,49 @@ TYPE
    : T Y P E
    ;
 
+
+/* 
+ * boolean 
+ */
+
+TRUE
+   : T R U E;
+
+FALSE
+   : F A L S E;
+
+/* 
+ * date 
+ */
+
+DATE_LITERAL
+   : DIGIT+ D;
+
+/* 
+ * time 
+ */
+
+TIME_LITERAL
+   : DIGIT+ ([.] DIGIT+)? T;
+
+/* 
+ * datetime 
+ */
+
+DATETIME_LITERAL
+   : DIGIT+ D T;
+
 /* 
  * numbers 
  */
 
-INTEGER_NUMBER
+INTEGER_LITERAL
    : DIGIT+
    | ('0' X HEXDIGIT*? | DIGIT+) (EXPONENT_NOTATION EXPONENT_SIGN DIGIT+)? INTEGER_SUFFIX?
    ;
 
-FLOAT_NUMBER
-	: (DIGIT+ [.] (DIGIT*)? (EXPONENT_NOTATION EXPONENT_SIGN DIGIT+)? 
+FLOAT_LITERAL
+	: (DIGIT+ [.] (DIGIT*)? {_input.La(1) != '.'}? (EXPONENT_NOTATION EXPONENT_SIGN DIGIT+)? 
 	| [.] DIGIT+ (EXPONENT_NOTATION EXPONENT_SIGN DIGIT+)? 
 	| DIGIT+ EXPONENT_NOTATION EXPONENT_SIGN DIGIT+) FLOAT_SUFFIX?
 	;
@@ -1021,7 +1071,7 @@ FLOAT_NUMBER
  * strings 
  */
 
-STRING 
+STRING_LITERAL
 	: '\'' ( ESC | ~['\r\n])* '\'';
 
 /* 

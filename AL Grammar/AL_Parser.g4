@@ -4,7 +4,7 @@ options { tokenVocab=AL_Lexer; }
 
 compileUnit
 	: EOF
-   | statementBlock
+   | statement EOF
 	;
 
 variableList
@@ -44,27 +44,154 @@ applicationObjectType
    | REPORT | TABLE | TABLEEXTENSION | XMLPORT | PROFILE | CONTROLADDIN | REPORTEXTENSION | INTERFACE 
    | PERMISSIONSET | PERMISSIONSETEXTENSION | ENTITLEMENT;
 
+/*
+ * AL IF statement logic
+ */
 
-statement
-   : expression SEMICOLON;
+ifConditionStatement
+   : IF expression THEN;
 
+elseStatement
+   : ELSE statement;
+
+ifStatement
+   : ifConditionStatement statement (elseStatement)?;
+
+/*
+ * AL WHILE statement logic
+ */
+
+whileConditionalStatement
+   : WHILE expression DO;
+
+whileStatement
+   : whileConditionalStatement statement;
+
+/*
+ * AL FOR statement logic
+ */
+
+forValue
+   : DATE_LITERAL
+   | TIME_LITERAL
+   | booleanLiteral
+   | numberLiteral
+   ;
+
+forControlStatement
+   : FOR IDENTIFIER ':=' forValue (TO | DOWNTO) forValue DO;
+
+forStatement
+   : forControlStatement statement;
+
+/*
+ * AL CASE statement logic
+ */
+
+caseValue
+   : numberLiteral
+   | booleanLiteral
+   | DATE_LITERAL
+   | TIME_LITERAL
+   | DATETIME_LITERAL
+   | optionLiteral
+   | STRING_LITERAL
+   ;
+
+caseSet
+   : caseValue (COMMA caseValue)*?;
+
+caseRange
+   : caseValue RANGE caseValue;
+
+caseValueStatement
+   : (caseSet | caseRange) COLON statement;
+
+caseElseStatement
+   : ELSE statement;
+
+caseBody
+   : (caseValueStatement (SEMICOLON caseValueStatement)*?)? caseElseStatement?;
+
+caseControlStatement
+   : CASE expression OF;
+
+caseStatement
+   : caseControlStatement caseBody END;
+
+/*
+ * AL REPEAT UNTIL statement logic
+ */
+
+untilCondition
+   : UNTIL expression;
+
+repeatUntilStatement
+   : REPEAT statement untilCondition;
+
+/*
+ * AL WITH statement logic
+ * (DEPRECATED in Dynamics 365 Business Central 2020, release wave 2)
+ */
+
+withControlStatement
+   : WITH IDENTIFIER DO;
+
+withStatement
+   : withControlStatement statement;
+
+/*
+ * AL generic statement statement logic
+ */
+
+statementLine
+   : ifStatement
+   | forStatement
+   | caseStatement
+   | withStatement
+   | whileStatement
+   | repeatUntilStatement
+   | expression;
+   
 statementBlock
    : BEGIN statementList END;
 
+statement
+   : (statementLine | statementBlock) SEMICOLON?
+   ;
+
 statementList
-   : (statement (statement)*?)?;
+   : (statementLine (SEMICOLON statementLine)*?)? SEMICOLON?;
+
+/*
+ * AL expression logic
+ */
 
 expression
-   : expression ('*' | '/' | MOD) expression #DivMultExpression
+   : '(' expression ')' #ParenthesisExpression
+   | expression ('*' | '/' | MOD) expression #DivMultExpression
    | expression ('+' | '-') expression #AddSubtractExpression
    | expression ('<' | '>' | '<=' | '>=' | '<>' | '=') expression #ComparisonExpression
    | expression (AND | OR) expression #LogicalComparisonExpression
    | IDENTIFIER (':=' | '/=' | '*=' | '+=' | '-=') expression #AssignmentExpression
+   | booleanLiteral #BooleanLiteralExpression
+   | DATE_LITERAL #DateLiteralExpression
+   | TIME_LITERAL #TimeLiteralExpression
+   | DATETIME_LITERAL #DatetimeLiteralExpression
    | IDENTIFIER #IdentifierExpression
-   | STRING #StringLiteralExpression
-   | number #NumberLiteralExpression;
+   | STRING_LITERAL #StringLiteralExpression
+   | numberLiteral #NumberLiteralExpression
+   | optionLiteral #OptionLiteralExpression;
 
-number
-   : FLOAT_NUMBER
-   | INTEGER_NUMBER
+optionLiteral
+   : IDENTIFIER OPTION_MEMBER IDENTIFIER;
+
+booleanLiteral
+   : TRUE
+   | FALSE
+   ;
+
+numberLiteral
+   : FLOAT_LITERAL
+   | INTEGER_LITERAL
    ;
