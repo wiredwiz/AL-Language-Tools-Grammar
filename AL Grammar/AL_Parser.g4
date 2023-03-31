@@ -45,6 +45,19 @@ applicationObjectType
    | PERMISSIONSET | PERMISSIONSETEXTENSION | ENTITLEMENT;
 
 /*
+ * Method attributes
+ */
+
+attributeArgument
+   : IDENTIFIER COLON builtinType;
+
+attributeArgumentList
+   : (attributeArgument (COMMA attributeArgument)*?)?;
+
+methodAttribute
+   : LEFTBRACKET IDENTIFIER (LEFTPAREN attributeArgumentList RIGHTPAREN)? RIGHTBRACKET;
+
+/*
  * AL IF statement logic
  */
 
@@ -167,13 +180,22 @@ statementList
  * AL expression logic
  */
 
+indexAccessorValue
+   : INTEGER_LITERAL
+   | IDENTIFIER
+   ;
+
+indexAccessorSet
+   : indexAccessorValue (COMMA indexAccessorValue)*?;
+
 expression
    : '(' expression ')' #ParenthesisExpression
    | expression ('*' | '/' | MOD) expression #DivMultExpression
    | expression ('+' | '-') expression #AddSubtractExpression
    | expression ('<' | '>' | '<=' | '>=' | '<>' | '=') expression #ComparisonExpression
    | expression (AND | OR) expression #LogicalComparisonExpression
-   | IDENTIFIER (':=' | '/=' | '*=' | '+=' | '-=') expression #AssignmentExpression
+   | expression (':=' | '/=' | '*=' | '+=' | '-=') expression #AssignmentExpression
+   | expression LEFTBRACKET indexAccessorSet RIGHTBRACKET #IndexExpression
    | booleanLiteral #BooleanLiteralExpression
    | DATE_LITERAL #DateLiteralExpression
    | TIME_LITERAL #TimeLiteralExpression
