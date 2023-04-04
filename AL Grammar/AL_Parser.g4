@@ -45,6 +45,146 @@ applicationObjectType
    | PERMISSIONSET | PERMISSIONSETEXTENSION | ENTITLEMENT;
 
 /*
+ * Field related rules
+ */
+
+fieldValue
+   : IDENTIFIER 
+   | INTEGER_LITERAL 
+   | FLOAT_LITERAL 
+   | DATE_LITERAL 
+   | TIME_LITERAL 
+   | DATETIME_LITERAL 
+   | STRING_LITERAL
+   ;
+
+comparisonFilter
+   : ('<>' | '=' | '<' | '>' | '<=' | '>=' ) fieldValue
+   ;
+
+filterRule
+   : (fieldValue | comparisonFilter)
+   ;
+
+compoundFilterRule
+   : filterRule (('|' | '&') filterRule)*?
+   ;
+
+tableReference
+   : IDENTIFIER
+   ;
+
+fieldReference
+   : IDENTIFIER
+   ;
+
+qualifiedFieldReference
+   : tableReference '.' fieldReference
+   ;
+
+/*
+ * Table relations
+ */
+
+tableRelationFilter
+   : IDENTIFIER '=' (FIELD LEFTPAREN IDENTIFIER RIGHTPAREN | CONST LEFTPAREN (IDENTIFIER | DIGIT+) RIGHTPAREN)
+   ;
+
+tableRelationFilters
+   : tableRelationFilter (COMMA tableRelationFilter)*?
+   ;
+
+tableRelationWhereClause
+   : WHERE LEFTPAREN tableRelationFilters RIGHTPAREN
+   ;
+
+fieldRelationClause
+   : (tableReference | qualifiedFieldReference) tableRelationWhereClause?
+   ;
+
+tableRelationIfCondition
+   : IF LEFTPAREN tableRelationFilters RIGHTPAREN fieldRelationClause tableRelationElseCondition?
+   ;
+
+tableRelationElseCondition
+   : ELSE tableRelationIfCondition
+   ;
+
+tableRelation
+   : fieldRelationClause?
+   | tableRelationIfCondition
+   ;
+
+/*
+ * Flow fields
+ */
+
+calcFormulaTableFilterValue
+   : CONST LEFTPAREN fieldValue RIGHTPAREN
+   | FILTER LEFTPAREN compoundFilterRule RIGHTPAREN
+   | FIELD LEFTPAREN IDENTIFIER RIGHTPAREN
+   | FIELD LEFTPAREN UPPERLIMIT LEFTPAREN IDENTIFIER RIGHTPAREN RIGHTPAREN
+   | FIELD LEFTPAREN FILTER LEFTPAREN IDENTIFIER RIGHTPAREN RIGHTPAREN
+   | FIELD LEFTPAREN UPPERLIMIT LEFTPAREN FILTER LEFTPAREN IDENTIFIER RIGHTPAREN RIGHTPAREN RIGHTPAREN
+   ;
+
+calcFormulaTableFilter
+   : fieldReference '=' calcFormulaTableFilterValue
+   ;
+
+calcFormulaTableFilters
+   : calcFormulaTableFilter (COMMA calcFormulaTableFilter)*?
+   ;
+
+calcFormulaWhereClause
+   : WHERE LEFTPAREN calcFormulaTableFilters RIGHTPAREN
+   ;
+
+calcFormulaExist
+   : '-' EXIST LEFTPAREN tableReference calcFormulaWhereClause? RIGHTPAREN
+   ;
+
+calcFormulaCount
+   : COUNT LEFTPAREN tableReference calcFormulaWhereClause? RIGHTPAREN
+   ;
+
+calcFormulaSum
+   : '-' SUM LEFTPAREN qualifiedFieldReference calcFormulaWhereClause? RIGHTPAREN
+   ;
+
+calcFormulaAverage
+   : '-' AVERAGE LEFTPAREN qualifiedFieldReference calcFormulaWhereClause? RIGHTPAREN
+   ;
+   
+calcFormulaMin
+   : MIN LEFTPAREN qualifiedFieldReference calcFormulaWhereClause? RIGHTPAREN
+   ;
+
+calcFormulaMax
+   : MAX LEFTPAREN qualifiedFieldReference calcFormulaWhereClause? RIGHTPAREN
+   ;
+
+calcFormulaLookup
+   : LOOKUP LEFTPAREN qualifiedFieldReference calcFormulaWhereClause? RIGHTPAREN
+   ;
+
+calcForumla
+   : calcFormulaExist
+   | calcFormulaCount
+   | calcFormulaSum
+   | calcFormulaAverage
+   | calcFormulaMin
+   | calcFormulaMax
+   | calcFormulaLookup
+   ;
+
+/*
+ * Tables
+ */
+
+
+
+/*
  * Method attributes
  */
 
