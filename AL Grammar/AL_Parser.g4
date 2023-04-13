@@ -7,21 +7,6 @@ compileUnit
    | statement EOF
 	;
 
-variableList
-	: IDENTIFIER (COMMA IDENTIFIER)*?;
-
-variableDeclaration
-   : variableList COLON builtinType SEMICOLON;
-
-variableDeclarations
-   : variableDeclaration (variableDeclaration)*?;
-
-varBlock
-   : VAR variableDeclaration;
-
-protectedVarBlock
-   : PROTECTED VAR variableDeclaration;
-
 builtinType
    : ACTION | ARRAY | AUTOMATION | BIGINTEGER | BIGTEXT | BLOB | BOOLEAN | BYTE | CHAR | CLIENTTYPE | CODE 
    | CODEUNIT | COMPLETIONTRIGGERERRORLEVEL | CONNECTIONTYPE | DATABASE | DATACLASSIFICATION | DATASCOPE 
@@ -179,10 +164,43 @@ calcForumla
    ;
 
 /*
+ * Type declarations
+ */
+
+sizeDeclaration : '[' INTEGER_LITERAL ']';
+
+/*
  * Tables
  */
 
+tableFieldId : INTEGER_LITERAL;
 
+tableFieldName : IDENTIFIER;
+
+tableFieldType
+   : INTEGER
+   | BIGINTEGER
+   | DECIMAL
+   | BOOLEAN
+   | BINARY
+   | BLOB
+   | CODE sizeDeclaration
+   | TEXT sizeDeclaration
+   | DATE
+   | TIME
+   | DATETIME
+   | DATEFORMULA
+   | DURATION
+   | RECORDID
+   | TABLEFILTER
+   | OPTION
+   | GUID
+   ;
+
+
+
+tableField
+   : FIELD LEFTPAREN tableFieldId ';' tableFieldName ';' tableFieldType RIGHTPAREN '{'  '}';
 
 /*
  * Method attributes
@@ -192,10 +210,227 @@ attributeArgument
    : IDENTIFIER COLON builtinType;
 
 attributeArgumentList
-   : (attributeArgument (COMMA attributeArgument)*?)?;
+   : attributeArgument (COMMA attributeArgument)*?;
 
 methodAttribute
-   : LEFTBRACKET IDENTIFIER (LEFTPAREN attributeArgumentList RIGHTPAREN)? RIGHTBRACKET;
+   : LEFTBRACKET IDENTIFIER (LEFTPAREN attributeArgumentList? RIGHTPAREN)? RIGHTBRACKET;
+
+/*
+ * Variables
+ */
+
+key
+   : IDENTIFIER
+   ;
+
+dataType
+   : IDENTIFIER
+   ;
+
+labelText
+   : STRING_LITERAL
+   ;
+
+labelMaxLength
+   : MAXLENGTH '=' INTEGER_LITERAL
+   ;
+
+labelComment
+   : COMMENT '=' STRING_LITERAL
+   ;
+
+labelLocked
+   : LOCKED '=' (TRUE | FALSE)
+   ;
+
+labelArgument
+   : labelMaxLength
+   | labelComment
+   | labelLocked
+   ;
+
+labelArgs
+   : labelArgument (COMMA labelArgument)*?
+   ;
+
+optionValue
+   : IDENTIFIER
+   ;
+
+optionValueList
+   : optionValue (COMMA optionValue)*?
+   ;
+
+variableTypeDeclaration
+   : ANY
+   | BIGINTEGER
+   | BIGTEXT
+   | BLOB
+   | BOOLEAN
+   | BYTE
+   | CHAR
+   | CODE sizeDeclaration
+   | CODEUNIT IDENTIFIER
+   | COMPANYPROPERTY
+   | DATABASE
+   | DATATRANSFER
+   | DATE
+   | DATEFORMULA
+   | DATETIME
+   | DEBUGGER
+   | DECIMAL
+   | DIALOG
+   | DICTIONARY OF '[' key COMMA dataType ']'
+   | DOTNOT IDENTIFIER
+   | DURATION
+   | ENUM IDENTIFIER
+   | ERRORINFO
+   | FIELDREF
+   | FILE
+   | FILTERPAGEBUILDER
+   | GUID
+   | HTTPCLIENT
+   | HTTPCONTENT
+   | HTTPHEADERS
+   | HTTPREQUESTMESSAGE
+   | HTTPRESPONSEMESSAGE
+   | INSTREAM
+   | INTEGER
+   | ISOLATEDSTORAGE
+   | JSONARRAY
+   | JSONOBJECT
+   | JSONTOKEN
+   | JSONVALUE
+   | KEYREF
+   | LABEL labelText (COMMA labelArgs)?
+   | LIST OF '[' dataType ']'
+   | MEDIA
+   | MEDIASET
+   | MODULEDEPENDENCYINFO
+   | MODULEINFO
+   | NAVAPP
+   | NONE
+   | NOTIFICATION
+   | NUMBERSEQUENCE
+   | OPTION optionValueList
+   | OUTSTREAM
+   | PAGE IDENTIFIER
+   | PRODUCTNAME
+   | QUERY IDENTIFIER
+   | RECORD IDENTIFIER TEMPORARY?
+   | RECORDID
+   | RECORDREF
+   | REPORT IDENTIFIER
+   | REQUESTPAGE IDENTIFIER
+   | SESSION
+   | SESSIONINFORMATION
+   | SESSIONSETTINGS
+   | SYSTEM
+   | TASKSCHEDULER
+   | TESTACTION
+   | TESTFIELD
+   | TESTFILTER
+   | TESTFILTERFIELD
+   | TESTPAGE
+   | TESTPART
+   | TESTREQUESTPAGE
+   | TEXT sizeDeclaration
+   | TEXTBUILDER
+   | TEXTCONST IDENTIFIER '=' STRING_LITERAL
+   | TIME
+   | VARIANT
+   | VERSION
+   | WEBSERVICEACTIONCONTEXT
+   | XMLATTRIBUTE
+   | XMLATTRIBUTECOLLECTION
+   | XMLCDATA
+   | XMLCOMMENT
+   | XMLDECLARATION
+   | XMLDOCUMENT
+   | XMLDOCUMENTTYPE
+   | XMLELEMENT
+   | XMLNAMESPACEMANAGER
+   | XMLNAMETABLE
+   | XMLNODE
+   | XMLNODELIST
+   | XMLPORT
+   | XMLPROCESSINGINSTRUCTION
+   | XMLREADOPTIONS
+   | XMLTEXT
+   | XMLWRITEOPTIONS
+   | ACTION
+   | AUDITCATEGORY
+   | CLIENTTYPE
+   | COMMITBEHAVIOR
+   | DATACLASSIFICATION
+   | DATASCOPE
+   | DEFAULTLAYOUT
+   | ERRORBEHAVIOR
+   | ERRORTYPE
+   | EXECUTIONCONTEXT
+   | EXECUTIONMODE
+   | FIELDCLASS
+   | FIELDTYPE
+   | INHERENTPERMISSIONSSCOPE
+   | ISOLATIONLEVEL
+   | NOTIFICATIONSCOPE
+   | OBJECTTYPE
+   | PAGEBACKGROUNDTASKERRORLEVEL
+   | PERMISSIONOBJECTTYPE
+   | REPORTFORMAT
+   | REPORTLAYOUTTYPE
+   | SECURITYFILTER
+   | SECURITYOPERATIONRESULT
+   | TABLECONNECTIONTYPE
+   | TELEMETRYSCOPE
+   | TESTPERMISSIONS
+   | TEXTENCODING
+   | TRANSACTIONMODEL
+   | TRANSACTIONTYPE
+   | VERBOSITY
+   | WEBSERVICEACTIONRESULTCODE
+   ;
+
+parameterDeclaration
+   : VAR? IDENTIFIER COLON variableTypeDeclaration
+   ;
+
+parameterList
+   : parameterDeclaration (SEMICOLON parameterDeclaration)*?
+   ;
+   
+variableNameList
+	: IDENTIFIER (COMMA IDENTIFIER)*?
+   ;
+
+variableDeclaration
+   : variableNameList COLON variableTypeDeclaration SEMICOLON
+   ;
+
+variableDeclarations
+   : variableDeclaration (variableDeclaration)*?
+   ;
+
+varBlock
+   : VAR variableDeclarations
+   ;
+
+protectedVarBlock
+   : PROTECTED VAR variableDeclaration
+   ;
+
+returnValue
+   : COLON IDENTIFIER
+   ;
+
+/*
+ * Trigger declarations
+ */
+
+triggerName : IDENTIFIER;
+
+triggerDeclaration
+   : TRIGGER triggerName LEFTPAREN parameterList? RIGHTPAREN returnValue? varBlock? statementBlock SEMICOLON;
 
 /*
  * AL IF statement logic
