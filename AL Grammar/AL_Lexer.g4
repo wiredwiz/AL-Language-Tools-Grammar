@@ -87,6 +87,12 @@ LEFTBRACKET
 RIGHTBRACKET
    : ']';
 
+LEFTCBRACE
+   : '{';
+
+RIGHTCBRACE
+   : '}';
+
 PIPE
    : '|';
 
